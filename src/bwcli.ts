@@ -1,5 +1,5 @@
 import { ScriptModel } from "bash-models/scriptModel"
-import { ParameterType, IErrorMessage } from "bash-models/commonModel"
+import { ParameterType, IErrorMessage, ValidationOptions } from "bash-models/commonModel"
 import fs from "fs"
 import getStdIn from "get-stdin"
 import path from "path";
@@ -98,7 +98,7 @@ export class BashCli {
         if (file === "stdin") {
             return new Promise<string>((resolve, reject) => {
                 getStdIn().then(str => {
-                    str = str.replace(/(\r?\n|\r)/gm, '\n');                   
+                    str = str.replace(/(\r?\n|\r)/gm, '\n');
                     resolve(str);
                 });
             })
@@ -107,14 +107,14 @@ export class BashCli {
             return this.readText(file);
         }
     }
-    readText = (filePath: string): Promise<string>  =>{
+    readText = (filePath: string): Promise<string> => {
         return new Promise<string>((resolve, reject) => {
             fs.readFile(
                 path.normalize(filePath),
                 (err: NodeJS.ErrnoException, data: Buffer) => {
                     if (err) {
                         return reject(err);
-                    }     
+                    }
                     resolve(data.toString());
                 }
             );
@@ -137,7 +137,7 @@ export class BashCli {
             model.parseJSON(inputContents, "");
         }
         else {
-            const err: string = `input file contents must start with a \"#\" if it is a shell script of a \"{\" if it is a JSON file.\n ${file} starts with: ${inputContents.substr(0, inputContents.indexOf('\n'))}`;
+            const err: string = `input file contents must start with a \"#\" if it is a shell script of a \"{\" if it is a JSON file.\n ${file} starts with: ${inputContents.substr(0, 300)}`;
             throw err;
         }
 
@@ -145,6 +145,7 @@ export class BashCli {
     }
 
     checkForParseErrors = (model: ScriptModel) => {
+        model.clearErrorsAndValidateParameters(ValidationOptions.ClearErrors);
         if (model.ErrorModel.Errors.length > 0) {
             model.ErrorModel.Errors.map((value: IErrorMessage, index: number) => {
                 console.error(`${index}\t${value.message}`);
