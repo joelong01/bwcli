@@ -1,4 +1,3 @@
--a: test2.sh
 #!/bin/bash
 #---------- see https://github.com/joelong01/Bash-Wizard----------------
 # bashWizard version 0.910
